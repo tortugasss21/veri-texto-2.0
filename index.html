@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VeriTexto - Detector de Desinformação com Inteligência Artificial">
+    <title>VeriTexto - Detector de Desinformação</title>
+    
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🔍</span>
+                <h1>VeriTexto</h1>
+            </div>
+            <p class="subtitle">Detector de Desinformação com IA</p>
+            <button class="btn-dark-mode" id="darkModeBtn" aria-label="Alternar modo escuro">🌙</button>
+        </header>
+
+        <!-- TABS DE NAVEGAÇÃO -->
+        <nav class="tabs" role="tablist">
+            <button class="tab-button active" role="tab" aria-selected="true" data-tab="analise">
+                Análise
+            </button>
+            <button class="tab-button" role="tab" aria-selected="false" data-tab="stats">
+                Estatísticas
+            </button>
+        </nav>
+
+        <!-- TAB: ANÁLISE -->
+        <div class="tab-content active" id="tab-analise" role="tabpanel">
+            <!-- Exemplos e Disclaimer -->
+            <div class="info-box" id="disclaimerBox">
+                <h3>⚠️ Aviso Importante</h3>
+                <p>O VeriTexto é uma ferramenta educacional que usa IA para auxiliar na detecção de desinformação. 
+                   Sempre verifique informações em múltiplas fontes confiáveis antes de tirar conclusões.</p>
+            </div>
+
+            <div class="examples-box" id="examplesBox">
+                <h3>💡 Exemplos de Entrada</h3>
+                <ul>
+                    <li><strong>Texto:</strong> Cole notícias, posts ou qualquer texto para análise</li>
+                    <li><strong>URL:</strong> Insira o link de um site para extrair e analisar o conteúdo</li>
+                </ul>
+            </div>
+
+            <!-- Seletor de modo -->
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="texto" id="btnModoTexto">📝 Analisar Texto</button>
+                <button class="mode-btn" data-mode="url" id="btnModoUrl">🌐 Analisar URL</button>
+            </div>
+
+            <!-- FORMULÁRIO DE TEXTO -->
+            <form id="formularioTexto" class="card form-section">
+                <div class="form-group">
+                    <label for="texto">Cole o texto para análise:</label>
+                    <textarea 
+                        id="texto" 
+                        placeholder="Digite ou cole aqui o texto que deseja verificar..."
+                        aria-describedby="help-texto"
+                    ></textarea>
+                    <small id="help-texto" class="form-help">Mínimo 20 caracteres, máximo 10.000</small>
+                </div>
+
+                <div class="button-row">
+                    <button type="submit" class="btn-primary" id="btnAnalisar">
+                        ✓ Analisar Texto
+                    </button>
+                    <button type="reset" class="btn-secondary" id="btnLimpar" disabled>
+                        ✕ Limpar
+                    </button>
+                </div>
+
+                <div id="errorMessage" class="mensagem mensagem-erro" style="display: none;"></div>
+            </form>
+
+            <!-- FORMULÁRIO DE URL -->
+            <form id="formularioUrl" class="card form-section" style="display: none;">
+                <div class="form-group">
+                    <label for="urlInput">Cole a URL do site:</label>
+                    <input 
+                        type="url" 
+                        id="urlInput" 
+                        placeholder="https://exemplo.com"
+                        aria-describedby="help-url"
+                    >
+                    <small id="help-url" class="form-help">Apenas URLs com http/https</small>
+                </div>
+
+                <div id="urlPreview" class="url-preview" style="display: none;"></div>
+
+                <div class="button-row">
+                    <button type="submit" class="btn-primary" id="btnAnalisarUrl">
+                        ✓ Analisar URL
+                    </button>
+                    <button type="reset" class="btn-secondary" id="btnLimparUrl" disabled>
+                        ✕ Limpar
+                    </button>
+                </div>
+
+                <div id="errorMessageUrl" class="mensagem mensagem-erro" style="display: none;"></div>
+            </form>
+
+            <!-- LOADING -->
+            <div id="skeletonLoader" class="skeleton-loader" style="display: none;">
+                <div class="spinner"></div>
+                <p>Analisando com IA...</p>
+            </div>
+
+            <!-- RESULTADOS -->
+            <div id="resultados" class="card resultado-card" style="display: none;">
+                <div class="risk-badge-container">
+                    <div class="risk-badge" id="riskBadge">
+                        <div class="risk-badge-value" id="riskPercentage">50%</div>
+                        <div class="risk-badge-label" id="riskTitle">Risco Médio</div>
+                    </div>
+                </div>
+
+                <div class="resultado-detalhes">
+                    <h3>Análise Detalhada</h3>
+                    <p id="riskDescription" class="risk-description"></p>
+                    <p id="explanation" class="explanation"></p>
+
+                    <!-- Sinais Identificados -->
+                    <div id="sinaisWrapper" style="display: none;">
+                        <h4>Sinais Identificados:</h4>
+                        <ul id="sinaisList" class="sinais-list"></ul>
+                    </div>
+
+                    <!-- Recomendação -->
+                    <div class="recomendacao">
+                        <h4>Recomendação:</h4>
+                        <p id="recommendation"></p>
+                    </div>
+
+                    <!-- Fontes Sugeridas -->
+                    <div id="fontesWrapper" style="display: none;">
+                        <h4>Fontes para Verificação:</h4>
+                        <div id="fontesList" class="fontes-list"></div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="button-row">
+                        <button type="button" class="btn-secondary" id="btnCopiar">
+                            📋 Copiar Resultado
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Feedback do Usuário -->
+                <div class="feedback-section">
+                    <h4>Essa análise foi útil?</h4>
+                    <p class="feedback-subtitle">Seu feedback ajuda a melhorar a IA</p>
+                    
+                    <div class="feedback-buttons">
+                        <button class="btn-feedback btn-yes" id="btnSim" onclick="feedbackUI.selecionarFeedback(true)">
+                            ✓ Sim, foi útil
+                        </button>
+                        <button class="btn-feedback btn-no" id="btnNao" onclick="feedbackUI.selecionarFeedback(false)">
+                            ✗ Não foi útil
+                        </button>
+                    </div>
+
+                    <div id="feedbackObs" class="feedback-obs" style="display: none;">
+                        <label for="feedbackObsText">Observações (opcional):</label>
+                        <textarea id="feedbackObsText" placeholder="Conte-nos o que achou..." maxlength="500"></textarea>
+                    </div>
+
+                    <button id="feedbackSend" class="btn-primary btn-feedback-send" 
+                            onclick="feedbackUI.enviarFeedback()" 
+                            style="display: none;">
+                        Enviar Feedback
+                    </button>
+
+                    <div id="feedbackMsg" class="feedback-msg"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: ESTATÍSTICAS -->
+        <div class="tab-content" id="tab-stats" role="tabpanel">
+            <div class="card">
+                <h2>Estatísticas do Sistema</h2>
+                <div id="statsContainer" class="stats-container">
+                    <p class="loading">Carregando estatísticas...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="/js/config.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/feedback.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
